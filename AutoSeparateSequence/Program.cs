@@ -28,6 +28,9 @@ namespace AutoSeparateSequence
             string primaryString = string.Empty;    //第1种原始字符串对应的主字符串，RC10B-2-04-01~03 => RC10B-2-04
             string primaryString2 = string.Empty;    //第2种原始字符串对应的主字符串，主线高架桥 30m跨简支小箱梁预应力钢束图（一）~（三） => 主线高架桥 30m跨简支小箱梁预应力钢束图
 
+            Regex singleRegex;
+            singleRegex = new Regex(".*(?=[0-9]{2}~[0-9]{2})");
+
             Regex regex;
             regex = new Regex(".*(?=（[一二三四五六七八九十]{1,3}）~（[一二三四五六七八九十]{1,3}）)");    //匹配结尾类似"（一）~（三）"之前的所有字符
             MatchCollection matchCollection;
@@ -105,30 +108,45 @@ namespace AutoSeparateSequence
                     for (int i = 0; i < sourceStringList1.Count; i++)
                     {
                         //primaryString = sourceStringList1[i].Substring(0, sourceStringList1[i].Length - 6);
-                        primaryString = sourceStringList1[i][0..^6];
-                        maxNumberString = sourceStringList1[i].Substring(sourceStringList1[i].Length - 2);
-                        if (maxNumberString.Substring(0) != "0")    //如果第1个字符不是0，则直接转换
+                        matchCollection = singleRegex.Matches(sourceStringList1[i]);
+                        if (matchCollection.Count > 0)
                         {
-                            maxNumber = Convert.ToInt32(maxNumberString);
-                        }
-                        else    //如果第1个字符是"0"，截取第2个字符
-                        {
-                            maxNumber = Convert.ToInt32(maxNumberString.Substring(1));
-                        }
+                            primaryString = sourceStringList1[i][0..^6];
 
-                        matchCollection = regex.Matches(sourceStringList2[i]);
-                        //第2种字符串
-                        for (int j = 0; j < maxNumber; j++)
-                        {
-                            if (j <= 8)    //如果是0-9,前面要+0
-                                worksheet.Cells[rowCurr, 2].Value = $"{primaryString}-0{j + 1}";
-                            else
-                                worksheet.Cells[rowCurr, 2].Value = $"{primaryString}-{j + 1}";
-                            primaryString2 = matchCollection[0].Value.ToString();    //仅取第1个匹配值
-                            worksheet.Cells[rowCurr, 3].Value = $"{primaryString2}（{NumberHelper.NumberToChinese(j + 1)}）";
+                            maxNumberString = sourceStringList1[i].Substring(sourceStringList1[i].Length - 2);
+                            if (maxNumberString.Substring(0) != "0")    //如果第1个字符不是0，则直接转换
+                            {
+                                maxNumber = Convert.ToInt32(maxNumberString);
+                            }
+                            else    //如果第1个字符是"0"，截取第2个字符
+                            {
+                                maxNumber = Convert.ToInt32(maxNumberString.Substring(1));
+                            }
 
+                            matchCollection = regex.Matches(sourceStringList2[i]);
+                            //第2种字符串
+                            for (int j = 0; j < maxNumber; j++)
+                            {
+                                if (j <= 8)    //如果是0-9,前面要+0
+                                    worksheet.Cells[rowCurr, 2].Value = $"{primaryString}-0{j + 1}";
+                                else
+                                    worksheet.Cells[rowCurr, 2].Value = $"{primaryString}-{j + 1}";
+                                primaryString2 = matchCollection[0].Value.ToString();    //仅取第1个匹配值
+                                worksheet.Cells[rowCurr, 3].Value = $"{primaryString2}（{NumberHelper.NumberToChinese(j + 1)}）";
+
+                                rowCurr++;
+                            }
+                        }
+                        else
+                        {
+                            worksheet.Cells[rowCurr, 2].Value = $"{sourceStringList1[i]}";
+                            worksheet.Cells[rowCurr, 3].Value = $"{sourceStringList2[i]}";
                             rowCurr++;
                         }
+                            
+
+
+                        
 
                     }
 
