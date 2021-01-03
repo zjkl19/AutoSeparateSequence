@@ -7,7 +7,7 @@ namespace AutoSeparateSequence.Services
     public static class NumberHelper
     {
         /// <summary>
-        /// 数字转中文（仅支持1至99）
+        /// 数字转中文（仅支持1至99），参考（有改动）：https://www.cnblogs.com/zuqing/p/4567384.html
         /// </summary>
         /// <param name="number">eg: 22</param>
         /// <returns></returns>
